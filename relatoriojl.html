@@ -1,0 +1,593 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Técnico - Joaquim Leme</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        /* Configurações de Páginas e Impressão (PDF) */
+        @page portrait_layout { size: A4 portrait; margin: 10mm; }
+        @page landscape_layout { size: A4 landscape; margin: 10mm; }
+        
+        .page-1 { page: portrait_layout; }
+        .page-2 { page: landscape_layout; break-before: page; page-break-before: always; }
+        .page-3 { page: landscape_layout; break-before: page; page-break-before: always; }
+        .page-4 { page: portrait_layout; break-before: page; page-break-before: always; }
+
+        /* Moldura para visualização na tela */
+        .page-1, .page-2, .page-3, .page-4 {
+            border: 1px solid #D7DEE6;
+            border-radius: 5px;
+            padding: 10mm;
+            background: #FFFFFF;
+            margin-bottom: 20px;
+        }
+        
+        /* Regras estritas para quando for Salvar como PDF / Imprimir */
+        @media print {
+            body { background-color: #FFFFFF; margin: 0; padding: 0; }
+            .page-1, .page-2, .page-3, .page-4 {
+                border: none;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+                page-break-after: always;
+            }
+            .page-4 { page-break-after: auto; } /* A última não precisa de quebra extra */
+            .chart-container { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .gantt-cell { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+        
+        body { 
+            font-family: 'Montserrat', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            color: #333333; 
+            line-height: 1.4; 
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            background-color: #F0F4F8; /* Fundo cinza na tela para destacar as folhas brancas */
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        /* Cabeçalho Minimalista */
+        .header { border-bottom: 1px solid #ECF0F1; padding-bottom: 10px; margin-bottom: 15px; }
+        .header h1 { color: #173A5E; margin: 0 0 5px 0; font-size: 16pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .header p { margin: 2px 0; font-size: 9pt; color: #555; }
+        
+        /* Títulos */
+        h2 { 
+            color: #173A5E; border-bottom: 1px solid #ECF0F1; padding-bottom: 4px; 
+            margin-top: 15px; margin-bottom: 10px; font-size: 12pt; font-weight: 600;
+            display: flex; align-items: center; page-break-after: avoid; 
+        }
+        .icon { margin-right: 8px; display: inline-block; vertical-align: middle; }
+        
+        /* Tabelas Gerais */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 0px; font-size: 8.5pt; }
+        tr { page-break-inside: avoid; }
+        th, td { border: 1px solid #ECF0F1; padding: 6px 8px; }
+        th { background-color: #F8F9FA; color: #173A5E; font-weight: 600; text-align: left; text-transform: uppercase; font-size: 7.5pt; letter-spacing: 0.5px; }
+        
+        .status-box { 
+            background-color: #F8F9FA; border-left: 3px solid #173A5E; padding: 10px 15px; 
+            margin-bottom: 15px; font-size: 9pt; text-align: justify; color: #444; page-break-inside: avoid;
+        }
+        
+        /* Gráfico na Página 1 */
+        .chart-container { margin-top: 40px; page-break-inside: avoid; }
+        .chart-title { text-align: center; color: #173A5E; font-size: 11pt; font-weight: 700; margin-bottom: 25px; text-transform: uppercase; }
+        .chart-wrapper { display: flex; padding: 0 5px; }
+        .axis-title-y { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 7.5pt; font-weight: 700; color: #555; padding-right: 8px; display: flex; align-items: center; justify-content: center; }
+        .y-axis { display: flex; flex-direction: column; justify-content: space-between; height: 150px; padding-right: 8px; font-size: 7.5pt; color: #666; font-weight: 600; margin-top: -5px; text-align: right; }
+        .plot-area { display: flex; flex-direction: column; flex-grow: 1; }
+        .bars-container { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; border-left: 2px solid #7F8C8D; border-bottom: 2px solid #7F8C8D; padding-left: 5px; }
+        .coluna-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 8.5%; }
+        .coluna-valor { font-size: 8pt; font-weight: bold; color: #173A5E; margin-bottom: 5px; }
+        .coluna-barra { width: 26px; background-color: #173A5E; border-radius: 3px 3px 0 0; }
+        .coluna-barra.zero { height: 2px !important; background-color: #BDC3C7; }
+        .x-axis-labels { display: flex; justify-content: space-around; margin-top: 8px; margin-left: 5px; }
+        .coluna-titulo { width: 8.5%; font-size: 7pt; text-align: center; color: #444; font-weight: 500; line-height: 1.1; }
+        .axis-title-x { text-align: center; font-size: 8pt; font-weight: 700; color: #555; margin-top: 15px; }
+        
+        /* Tabela Pendências (Página 2 - Paisagem) */
+        .pendencias-table { height: auto; min-height: 85vh; }
+        .pendencias-table th, .pendencias-table td { padding: 6px 8px; font-size: 8.5pt; line-height: 1.3; }
+        .col-area { width: 14%; vertical-align: middle; text-align: center; }
+        .col-desc { width: 33%; text-align: justify; }
+        .col-action { width: 38%; text-align: justify; color: #444; }
+        .col-resp { width: 15%; text-align: center; font-weight: 500; }
+
+        /* Tabela Gantt (Página 3 - Paisagem) */
+        .gantt-table { table-layout: fixed; height: auto; min-height: 85vh; }
+        .gantt-table th, .gantt-table td { border: 1px solid #ECF0F1; padding: 3px 2px; font-size: 7.5pt; word-wrap: break-word; }
+        .gantt-table th { text-align: center; }
+        .gantt-table td.gantt-area { text-align: center; vertical-align: middle; width: 13%; }
+        .gantt-desc { width: 33%; text-align: left; color: #444; }
+        .gantt-day { background-color: #F8F9FA; padding: 2px 0px !important; text-align: center; }
+        .gantt-cell { padding: 0 !important; height: 16px; border: 1px solid #f0f0f0; }
+        
+        .gantt-sin { background-color: #E67E22; border: 1px solid #D35400; } 
+        .gantt-pai { background-color: #27AE60; border: 1px solid #229954; } 
+        .gantt-esg { background-color: #8E44AD; border: 1px solid #7D3C98; } 
+        .gantt-pav { background-color: #2980B9; border: 1px solid #2471A3; } 
+        .gantt-ter { background-color: #D35400; border: 1px solid #BA4A00; } 
+        .gantt-gui { background-color: #16A085; border: 1px solid #138D75; } 
+        .gantt-man { background-color: #C0392B; border: 1px solid #A93226; } 
+        .gantt-dre { background-color: #34495E; border: 1px solid #2C3E50; } 
+        .gantt-dis { background-color: #3498DB; border: 1px solid #2E86C1; } 
+        .gantt-ace { background-color: #F39C12; border: 1px solid #D68910; } 
+        
+        /* Galeria de Fotos (Página 4 - Retrato) */
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Duas fotos por linha */
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .photo-card {
+            border: 1px solid #BDC3C7;
+            border-radius: 4px;
+            padding: 8px;
+            background-color: #F8F9FA;
+            page-break-inside: avoid; /* Impede que a foto seja cortada na troca de página no PDF */
+            text-align: center;
+        }
+        .photo-card img {
+            width: 100%;
+            height: 220px; /* Altura padronizada para as fotos */
+            object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .photo-caption {
+            font-size: 8.5pt;
+            color: #444;
+            line-height: 1.3;
+        }
+        
+        /* Assinatura */
+        .signature {
+            text-align: center; 
+            margin-top: 60px; 
+            page-break-inside: avoid;
+            color: #555;
+            font-size: 9pt;
+        }
+        .signature hr {
+            width: 40%; 
+            border: 0;
+            border-top: 1px solid #333;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Página 1: Retrato -->
+    <div class="page-1">
+        <div class="header">
+            <h1>Relatório Técnico de Planejamento de Obras</h1>
+            <p><strong>Empreendimento:</strong> Loteamento Joaquim Leme | Ituiutaba - MG</p>
+            <p><strong>Data da Visita:</strong> 15/09/2026 a 17/09/2026</p>
+            <p><strong>Responsável Técnico:</strong> Gustavo Costa</p>
+        </div>
+
+        <div class="status-box">
+            <strong>Resumo Executivo:</strong> O Loteamento Joaquim Leme encontra-se em fase final de execução de infraestrutura. Este relatório consolida as observações da visita técnica, o status de avanço físico de cada disciplina, as pendências atuais e o plano de ação necessário para a conclusão e entrega do empreendimento.
+        </div>
+
+        <h2><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#173A5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-3v13"/><path d="M9 14h4"/></svg></span> 1. Avanço Físico das Infraestruturas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Disciplina</th>
+                    <th style="width: 15%; text-align: center;">Avanço</th>
+                    <th style="width: 65%;">Observações Técnicas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Terraplanagem</td><td style="text-align: center; font-weight: bold; color: #173A5E;">100%</td><td style="text-align: justify; color: #444;">Será necessário realizar acabamento na faixa de calçada em todas as quadras, com acerto e nivelamento do trecho destinado a pedestres.</td></tr>
+                <tr><td>Rede Elétrica</td><td style="text-align: center; font-weight: bold; color: #173A5E;">100%</td><td style="text-align: justify; color: #444;">Sem observações.</td></tr>
+                <tr><td>Guias e Sarjetas</td><td style="text-align: center; font-weight: bold; color: #173A5E;">95%</td><td style="text-align: justify; color: #444;">Reparo pontual da estrutura das guias com aplicação de argamassa. Pintura completa com cal para pintura nos meios-fios de quadras e canteiros.</td></tr>
+                <tr><td>Pavimentação</td><td style="text-align: center; font-weight: bold; color: #173A5E;">95%</td><td style="text-align: justify; color: #444;">Será necessário aplicar capa de asfalto em ao menos 60 pontos em torno de Poços de Visita e Bocas de Lobo na parte interna do empreendimento.</td></tr>
+                <tr><td>Drenagem Pluvial</td><td style="text-align: center; font-weight: bold; color: #173A5E;">90%</td><td style="text-align: justify; color: #444;">Será necessário construir a ala dissipadora da drenagem.</td></tr>
+                <tr><td>Distribuição de Água</td><td style="text-align: center; font-weight: bold; color: #173A5E;">90%</td><td style="text-align: justify; color: #444;">Travessia pelo MND sob a rodovia, e ligação no ponto de distribuição interno.</td></tr>
+                <tr><td>Esgoto Sanitário</td><td style="text-align: center; font-weight: bold; color: #173A5E;">80%</td><td style="text-align: justify; color: #444;">Construção da casa de abrigo do Booster, Aquisição e Instalação do Booster, Construção da Rede de Recalque de Esgoto, Travessia pelo MND, Construção da Rede Interceptora de Esgoto.</td></tr>
+                <tr><td>Manutenções</td><td style="text-align: center; font-weight: bold; color: #173A5E;">80%</td><td style="text-align: justify; color: #444;">Execução de limpeza de bocas de lobo e da parte superior dos poços de visita de esgoto e águas pluviais.</td></tr>
+                <tr><td>Sinalização</td><td style="text-align: center; font-weight: bold; color: #173A5E;">0%</td><td style="text-align: justify; color: #444;">Discutir necessidade de projeto de sinalização e implantação do mesmo.</td></tr>
+                <tr><td>Paisagismo</td><td style="text-align: center; font-weight: bold; color: #173A5E;">0%</td><td style="text-align: justify; color: #444;">Discutir necessidade de projeto de paisagismo. Foi pensado a execução de uma praça na rotatória central do empreendimento e plantio de árvores nos canteiros centrais.</td></tr>
+                <tr><td>Acesso</td><td style="text-align: center; font-weight: bold; color: #173A5E;">0%</td><td style="text-align: justify; color: #444;">O local para construção do acesso já está livre de guias, configurando livre acesso para terraplanagem e abertura do acesso, para posterior construção de infraestrutura de pavimento, guias e sinalização.</td></tr>
+            </tbody>
+        </table>
+
+        <div class="chart-container">
+            <div class="chart-title">Status de Avanço Físico por Etapa - Joaquim Leme</div>
+            <div class="chart-wrapper">
+                <div class="axis-title-y">Avanço Físico (%)</div>
+                <div class="y-axis">
+                    <span>100%</span>
+                    <span>75%</span>
+                    <span>50%</span>
+                    <span>25%</span>
+                    <span>0%</span>
+                </div>
+                <div class="plot-area">
+                    <div class="bars-container">
+                        <div class="coluna-container">
+                            <div class="coluna-valor">100%</div>
+                            <div class="coluna-barra" style="height: 150px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">100%</div>
+                            <div class="coluna-barra" style="height: 150px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">95%</div>
+                            <div class="coluna-barra" style="height: 142px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">95%</div>
+                            <div class="coluna-barra" style="height: 142px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">90%</div>
+                            <div class="coluna-barra" style="height: 135px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">90%</div>
+                            <div class="coluna-barra" style="height: 135px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">80%</div>
+                            <div class="coluna-barra" style="height: 120px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">80%</div>
+                            <div class="coluna-barra" style="height: 120px;"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">0%</div>
+                            <div class="coluna-barra zero"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">0%</div>
+                            <div class="coluna-barra zero"></div>
+                        </div>
+                        <div class="coluna-container">
+                            <div class="coluna-valor">0%</div>
+                            <div class="coluna-barra zero"></div>
+                        </div>
+                    </div>
+                    <div class="x-axis-labels">
+                        <div class="coluna-titulo">Terrapla-<br>nagem</div>
+                        <div class="coluna-titulo">Rede<br>Elétrica</div>
+                        <div class="coluna-titulo">Guias e<br>Sarjetas</div>
+                        <div class="coluna-titulo">Pavi-<br>mentação</div>
+                        <div class="coluna-titulo">Drenagem<br>Pluvial</div>
+                        <div class="coluna-titulo">Dist. de<br>Água</div>
+                        <div class="coluna-titulo">Esgoto<br>Sanitário</div>
+                        <div class="coluna-titulo">Manu-<br>tenções</div>
+                        <div class="coluna-titulo">Sinali-<br>zação</div>
+                        <div class="coluna-titulo">Paisa-<br>gismo</div>
+                        <div class="coluna-titulo">Acesso</div>
+                    </div>
+                    <div class="axis-title-x">Etapas da Obra</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página 2: Paisagem isolada para Pendências -->
+    <div class="page-2">
+        <h2><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#173A5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></span> 2. Levantamento de Pendências</h2>
+        <table class="pendencias-table">
+            <thead>
+                <tr>
+                    <th>Área</th>
+                    <th>Descrição da Pendência</th>
+                    <th>Ações Planejadas</th>
+                    <th style="text-align: center;">Responsável</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td rowspan='1' class='col-area'><strong>Terraplanagem</strong></td><td class='col-desc'>I. Acabamento e nivelamento das faixas de calçadas para pedestres em todas as quadras.</td><td class='col-action'>Elaborar escopo, cotar e contratar.</td><td class='col-resp'>Gustavo/Lais</td></tr>
+                <tr><td rowspan='1' class='col-area'><strong>Drenagem<br>Pluvial</strong></td><td class='col-desc'>I. Construção da ala dissipadora.</td><td class='col-action'>Discussão com secretaria de obras sobre projeto, após definição cotar, comprar e contratar.</td><td class='col-resp'>Arthur, Gustavo/Lais</td></tr>
+                <tr><td rowspan='2' class='col-area'><strong>Distribuição<br>de Água</strong></td><td class='col-desc'>I. Execução da travessia via MND sob a rodovia.</td><td class='col-action'>Formalização de Ofício ao DNIT, cotação e contratação.</td><td class='col-resp'>Arthur, Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>II. Interligação no ponto de distribuição interno.</td><td class='col-action'>Ativação após ligação MND, material já adquirido e mão de obra contratada.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='4' class='col-area'><strong>Esgoto<br>Sanitário</strong></td><td class='col-desc'>I. Construção da casa de abrigo do Booster.</td><td class='col-action'>Elaborar escopo, cotar e contratar.</td><td class='col-resp'>Arthur, Gustavo/Lais</td></tr>
+                <tr><td class='col-desc'>II. Aquisição e Instalação do Booster.</td><td class='col-action'>Cotar equipamento e mão de obra, comprar e contratar.</td><td class='col-resp'>Gustavo/Lais</td></tr>
+                <tr><td class='col-desc'>III. Construção da Rede de Recalque de Esgoto.</td><td class='col-action'>Cotar material e mão de obra, comprar e contratar.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>IV. Construção da Rede Interceptora de Esgoto.</td><td class='col-action'>Aditivar alteração de escopo, cotar e comprar material.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='1' class='col-area'><strong>Manutenções</strong></td><td class='col-desc'>I. Execução de limpeza de bocas de lobo e da parte superior dos poços de visita de esgoto e águas pluviais.</td><td class='col-action'>Formalizar escopo, cotar mão de obra e contratar.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='1' class='col-area'><strong>Pavimentação</strong></td><td class='col-desc'>I. Aplicação de asfalto no entorno de aprox. 60 PVs e Bocas de Lobo.</td><td class='col-action'>Cotar mão de obra com fornecimento de CBUQ incluso e contratar.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='2' class='col-area'><strong>Guias e<br>Sarjetas</strong></td><td class='col-desc'>I. Reparo pontual da estrutura das guias com aplicação de argamassa.</td><td class='col-action'>Formalizar escopo, cotar e contratar mão de obra c/ material.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>II. Pintura completa com cal para pintura nos meios-fios de quadras e canteiros.</td><td class='col-action'>Formalizar escopo, cotar e contratar mão de obra c/ material.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='2' class='col-area'><strong>Sinalização</strong></td><td class='col-desc'>I. Discutir necessidade e definir projeto de sinalização.</td><td class='col-action'>Elaboração de escopo, cotar material e contratar mão de obra.</td><td class='col-resp'>Arthur, Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>II. Implantação da sinalização viária.</td><td class='col-action'>Discussão sobre necessidade de projeto, após isso cotar mão de obra com fornecimento de material e contratar.</td><td class='col-resp'>Arthur, Gustavo/Lais</td></tr>
+                <tr><td rowspan='3' class='col-area'><strong>Paisagismo e<br>Meio-Ambiente</strong></td><td class='col-desc'>I. Discutir necessidade e definir projeto de paisagismo com setor responsável pelo recebimento.</td><td class='col-action'>Cotar material e contratar mão de obra.</td><td class='col-resp'>Gustavo/Lais</td></tr>
+                <tr><td class='col-desc'>II. Execução de uma praça na rotatória central.</td><td class='col-action'>Formalizar escopo, cotar mão de obra e material, comprar e contratar.</td><td class='col-resp'>Arthur</td></tr>
+                <tr><td class='col-desc'>III. Plantio de árvores nos canteiros centrais.</td><td class='col-action'>Formalização de escopo, cotar mão de obra com fornecimento de materiais.</td><td class='col-resp'>Gustavo/Laís</td></tr>
+                <tr><td rowspan='3' class='col-area'><strong>Acesso</strong></td><td class='col-desc'>I. Execução da terraplanagem e abertura do acesso.</td><td class='col-action'>Formalização de escopo, cotar e contratar mão de obra.</td><td class='col-resp'>Arthur, Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>II. Construção de infraestrutura de pavimento e guias.</td><td class='col-action'>Formalização de escopo, cotar e contratar mão de obra.</td><td class='col-resp'>Arthur, Gustavo/Laís</td></tr>
+                <tr><td class='col-desc'>III. Sinalização da área de acesso ao empreendimento.</td><td class='col-action'>Formalização de escopo, cotar e contratar mão de obra.</td><td class='col-resp'>Arthur, Gustavo/Laís</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Página 3: Paisagem isolada para Gantt -->
+    <div class="page-3">
+        <h2><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C3E50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="21" y2="14"/><line x1="8" y1="18" x2="21" y2="18"/></svg></span> 3. Cronograma de Ações Finais (Gantt)</h2>
+        <table class="gantt-table">
+            <thead>
+                <tr>
+                    <th class="gantt-area">Área</th>
+                    <th class="gantt-desc" style="text-align: left;">Pendência</th>
+                    <th class='gantt-day'>21<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>22<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>23<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>24<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>25<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>28<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>29<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>30<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>01<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>02<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>05<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>06<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>07<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>08<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>09<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>12<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>13<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>14<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>15<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>16<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>19<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>20<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>21<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>22<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>23<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>26<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>27<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>28<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>29<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>30<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sinalização (Início: 21/09) -->
+                <tr><td class='gantt-area' rowspan='2'><strong>Sinalização</strong></td><td class='gantt-desc'>I. Discutir necessidade e definir projeto de sinalização.</td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Implantação da sinalização viária.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell gantt-sin'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Paisagismo (Início: 21/09) -->
+                <tr><td class='gantt-area' rowspan='3'><strong>Paisagismo e<br>Meio-Ambiente</strong></td><td class='gantt-desc'>I. Discutir necessidade e definir projeto de paisagismo.</td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Execução de uma praça na rotatória central.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>III. Plantio de árvores nos canteiros centrais.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell gantt-pai'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Esgoto Sanitário (Início: 23/09) -->
+                <tr><td class='gantt-area' rowspan='4'><strong>Esgoto<br>Sanitário</strong></td><td class='gantt-desc'>I. Construção da casa de abrigo do Booster.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Aquisição e Instalação do Booster.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>III. Construção da Rede de Recalque de Esgoto.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>IV. Construção da Rede Interceptora de Esgoto.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell gantt-esg'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Pavimentação (Início: 25/09) -->
+                <tr><td class='gantt-area' rowspan='1'><strong>Pavimentação</strong></td><td class='gantt-desc'>I. Aplicação de asfalto no entorno de aprox. 60 PVs e Bocas de Lobo.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell gantt-pav'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Terraplanagem (Início: 28/09) -->
+                <tr><td class='gantt-area' rowspan='1'><strong>Terraplanagem</strong></td><td class='gantt-desc'>I. Acabamento e nivelamento das faixas de calçadas para pedestres em todas as quadras.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell gantt-ter'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Guias e Sarjetas (Início: 28/09) -->
+                <tr><td class='gantt-area' rowspan='2'><strong>Guias e<br>Sarjetas</strong></td><td class='gantt-desc'>I. Reparo pontual da estrutura das guias com aplicação de argamassa.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Pintura completa com cal para pintura nos meios-fios de quadras e canteiros.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell gantt-gui'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Manutenções (Início: 28/09) -->
+                <tr><td class='gantt-area' rowspan='1'><strong>Manutenções</strong></td><td class='gantt-desc'>I. Execução de limpeza de bocas de lobo e poços de visita.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell gantt-man'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Drenagem Pluvial (Início: 05/10) -->
+                <tr><td class='gantt-area' rowspan='1'><strong>Drenagem<br>Pluvial</strong></td><td class='gantt-desc'>I. Construção da ala dissipadora.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell gantt-dre'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Distribuição de Água (Início: 12/10) -->
+                <tr><td class='gantt-area' rowspan='2'><strong>Distribuição<br>de Água</strong></td><td class='gantt-desc'>I. Execução da travessia via MND sob a rodovia.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Interligação no ponto de distribuição interno.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell gantt-dis'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                
+                <!-- Acesso (Início: 12/10) -->
+                <tr><td class='gantt-area' rowspan='3'><strong>Acesso</strong></td><td class='gantt-desc'>I. Execução da terraplanagem e abertura do acesso.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>II. Construção de infraestrutura de pavimento e guias.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td></tr>
+                <tr><td class='gantt-desc'>III. Sinalização da área de acesso ao empreendimento.</td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell gantt-ace'></td><td class='gantt-cell'></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Página 4: Retrato para Fotos -->
+    <div class="page-4">
+        <h2><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#173A5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> 4. Registro Fotográfico</h2>
+        <p style="font-size: 9.5pt; color: #555;">Documentação visual das frentes de serviço citadas no levantamento.</p>
+        
+        <!-- INÍCIO DA GALERIA DE FOTOS (50 Imagens Mapeadas) -->
+        <div class="photo-gallery">
+            
+            <div class="photo-card">
+                <img src="Ventosa3.jpeg" alt="Caixa de Ventosa">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+            </div>
+            <div class="photo-card">
+                <img src="Ventosa2.jpeg" alt="Caixa de Ventosa">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+            </div>
+            <div class="photo-card">
+                <img src="Ventosa01.jpeg" alt="Caixa de Ventosa">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+            </div>
+            <div class="photo-card">
+                <img src="Terraplanagem01.jpeg" alt="Terraplanagem">
+                <div class="photo-caption"><strong>Terraplanagem:</strong> Nivelamento da área</div>
+            </div>
+            <div class="photo-card">
+                <img src="Rotatoria.jpeg" alt="Rotatória Central">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Rotatória Central</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV17.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV16.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV15.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV14.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV13.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV12.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV11.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV10.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV09.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV08.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV07.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV06.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV05.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV04.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV03.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV02.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="PV01.jpeg" alt="Poço de Visita">
+                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+            </div>
+            <div class="photo-card">
+                <img src="MeioFio03.jpeg" alt="Meio Fio">
+                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+            </div>
+            <div class="photo-card">
+                <img src="MeioFio02.jpeg" alt="Meio Fio">
+                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+            </div>
+            <div class="photo-card">
+                <img src="MeioFio01.jpeg" alt="Meio Fio">
+                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+            </div>
+            <div class="photo-card">
+                <img src="MatoRua02.jpeg" alt="Limpeza de Mato">
+                <div class="photo-caption"><strong>Paisagismo / Limpeza:</strong> Mato na via</div>
+            </div>
+            <div class="photo-card">
+                <img src="MatoRua.jpeg" alt="Limpeza de Mato">
+                <div class="photo-caption"><strong>Paisagismo / Limpeza:</strong> Mato na via</div>
+            </div>
+            <div class="photo-card">
+                <img src="Inter04.jpeg" alt="Interligação">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+            </div>
+            <div class="photo-card">
+                <img src="Inter03.jpeg" alt="Interligação">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+            </div>
+            <div class="photo-card">
+                <img src="Inter02.jpeg" alt="Interligação">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+            </div>
+            <div class="photo-card">
+                <img src="Inter01.jpeg" alt="Interligação">
+                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+            </div>
+            <div class="photo-card">
+                <img src="HID02.jpeg" alt="Hidrante">
+                <div class="photo-caption"><strong>Sinalização / Água:</strong> Hidrante</div>
+            </div>
+            <div class="photo-card">
+                <img src="HID01.jpeg" alt="Hidrante">
+                <div class="photo-caption"><strong>Sinalização / Água:</strong> Hidrante</div>
+            </div>
+            <div class="photo-card">
+                <img src="Entulhos.jpeg" alt="Limpeza de Entulhos">
+                <div class="photo-caption"><strong>Limpeza:</strong> Remoção de entulhos</div>
+            </div>
+            <div class="photo-card">
+                <img src="CanteiroCentral03.jpeg" alt="Canteiro Central">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+            </div>
+            <div class="photo-card">
+                <img src="CanteiroCentral02.jpeg" alt="Canteiro Central">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+            </div>
+            <div class="photo-card">
+                <img src="CanteiroCentral.jpeg" alt="Canteiro Central">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+            </div>
+            <div class="photo-card">
+                <img src="Canteiro.jpeg" alt="Canteiro">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL08.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL07.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL06.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL05.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL04.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="BL01.jpeg" alt="Boca de Lobo">
+                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+            </div>
+            <div class="photo-card">
+                <img src="Arbustos02.jpeg" alt="Arbustos">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Arbustos</div>
+            </div>
+            <div class="photo-card">
+                <img src="Arbustos.jpeg" alt="Arbustos">
+                <div class="photo-caption"><strong>Paisagismo:</strong> Arbustos</div>
+            </div>
+            <div class="photo-card">
+                <img src="Alvenaria02.jpeg" alt="Alvenaria">
+                <div class="photo-caption"><strong>Infraestrutura:</strong> Alvenaria</div>
+            </div>
+            <div class="photo-card">
+                <img src="Alvenaria01.jpeg" alt="Alvenaria">
+                <div class="photo-caption"><strong>Infraestrutura:</strong> Alvenaria</div>
+            </div>
+            <div class="photo-card">
+                <img src="Acesso.jpeg" alt="Acesso">
+                <div class="photo-caption"><strong>Acesso:</strong> Entrada do Empreendimento</div>
+            </div>
+            <div class="photo-card">
+                <img src="Abrigo.jpeg" alt="Abrigo">
+                <div class="photo-caption"><strong>Esgoto Sanitário:</strong> Casa de abrigo</div>
+            </div>
+
+        </div>
+        <!-- FIM DA GALERIA DE FOTOS -->
+
+        <div class="signature">
+            <hr>
+            <strong>Gustavo Costa</strong><br>
+            Engenheiro Responsável / Gestor de Obras
+        </div>
+    </div>
+</body>
+</html>
