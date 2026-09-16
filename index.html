@@ -120,32 +120,26 @@
         .gantt-dis { background-color: #3498DB; border: 1px solid #2E86C1; } 
         .gantt-ace { background-color: #F39C12; border: 1px solid #D68910; } 
         
-        /* Galeria de Fotos (Página 4 - Retrato) */
+        /* Galeria de Fotos em Cascata (Masonry Layout) para tamanhos reais */
         .photo-gallery {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Duas fotos por linha */
-            gap: 15px;
+            column-count: 2; /* Divide em 2 colunas */
+            column-gap: 15px;
             margin-top: 15px;
         }
         .photo-card {
+            break-inside: avoid; /* Mantém a foto inteira na quebra de página do PDF */
+            margin-bottom: 15px;
             border: 1px solid #BDC3C7;
             border-radius: 4px;
             padding: 8px;
             background-color: #F8F9FA;
-            page-break-inside: avoid; /* Impede que a foto seja cortada na troca de página no PDF */
             text-align: center;
         }
         .photo-card img {
             width: 100%;
-            height: 220px; /* Altura padronizada para as fotos */
-            object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
+            height: auto; /* Permite a proporção original da foto */
+            display: block;
             border-radius: 3px;
-            margin-bottom: 8px;
-        }
-        .photo-caption {
-            font-size: 8.5pt;
-            color: #444;
-            line-height: 1.3;
         }
         
         /* Assinatura */
@@ -374,210 +368,167 @@
     <!-- Página 4: Retrato para Fotos -->
     <div class="page-4">
         <h2><span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#173A5E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> 4. Registro Fotográfico</h2>
-        <p style="font-size: 9.5pt; color: #555;">Documentação visual das frentes de serviço citadas no levantamento.</p>
         
-        <!-- INÍCIO DA GALERIA DE FOTOS (50 Imagens Mapeadas) -->
+        <!-- INÍCIO DA GALERIA DE FOTOS (Masonry CSS) -->
         <div class="photo-gallery">
             
+            <!-- Grupo 1: Visão Geral / Áreas Externas (Maiores/Paisagem) -->
             <div class="photo-card">
-                <img src="Ventosa3.jpeg" alt="Caixa de Ventosa">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+                <img src="Acesso.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Ventosa2.jpeg" alt="Caixa de Ventosa">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+                <img src="Terraplanagem01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Ventosa01.jpeg" alt="Caixa de Ventosa">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Caixa de Ventosa</div>
+                <img src="Rotatoria.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Terraplanagem01.jpeg" alt="Terraplanagem">
-                <div class="photo-caption"><strong>Terraplanagem:</strong> Nivelamento da área</div>
+                <img src="CanteiroCentral.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Rotatoria.jpeg" alt="Rotatória Central">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Rotatória Central</div>
+                <img src="CanteiroCentral02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV17.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="CanteiroCentral03.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV16.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Canteiro.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV15.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Arbustos.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV14.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Arbustos02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV13.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="MatoRua.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV12.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="MatoRua02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV11.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Entulhos.jpeg" alt="Registro Fotográfico">
+            </div>
+
+            <!-- Grupo 2: Estruturas / Água e Esgoto -->
+            <div class="photo-card">
+                <img src="Abrigo.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV10.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Alvenaria01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV09.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Alvenaria02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV08.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Inter01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV07.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Inter02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV06.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Inter03.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV05.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Inter04.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV04.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="HID01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV03.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="HID02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV02.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Ventosa01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="PV01.jpeg" alt="Poço de Visita">
-                <div class="photo-caption"><strong>Manutenções:</strong> Poço de Visita (PV)</div>
+                <img src="Ventosa2.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="MeioFio03.jpeg" alt="Meio Fio">
-                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+                <img src="Ventosa3.jpeg" alt="Registro Fotográfico">
+            </div>
+
+            <!-- Grupo 3: Guias e Sarjetas -->
+            <div class="photo-card">
+                <img src="MeioFio01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="MeioFio02.jpeg" alt="Meio Fio">
-                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+                <img src="MeioFio02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="MeioFio01.jpeg" alt="Meio Fio">
-                <div class="photo-caption"><strong>Guias e Sarjetas:</strong> Meio-Fio</div>
+                <img src="MeioFio03.jpeg" alt="Registro Fotográfico">
+            </div>
+
+            <!-- Grupo 4: Manutenções / Detalhes (PVs e BLs) -->
+            <div class="photo-card">
+                <img src="PV01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="MatoRua02.jpeg" alt="Limpeza de Mato">
-                <div class="photo-caption"><strong>Paisagismo / Limpeza:</strong> Mato na via</div>
+                <img src="PV02.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="MatoRua.jpeg" alt="Limpeza de Mato">
-                <div class="photo-caption"><strong>Paisagismo / Limpeza:</strong> Mato na via</div>
+                <img src="PV03.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Inter04.jpeg" alt="Interligação">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+                <img src="PV04.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Inter03.jpeg" alt="Interligação">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+                <img src="PV05.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Inter02.jpeg" alt="Interligação">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+                <img src="PV06.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Inter01.jpeg" alt="Interligação">
-                <div class="photo-caption"><strong>Distribuição de Água:</strong> Interligação / Reservatório</div>
+                <img src="PV07.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="HID02.jpeg" alt="Hidrante">
-                <div class="photo-caption"><strong>Sinalização / Água:</strong> Hidrante</div>
+                <img src="PV08.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="HID01.jpeg" alt="Hidrante">
-                <div class="photo-caption"><strong>Sinalização / Água:</strong> Hidrante</div>
+                <img src="PV09.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Entulhos.jpeg" alt="Limpeza de Entulhos">
-                <div class="photo-caption"><strong>Limpeza:</strong> Remoção de entulhos</div>
+                <img src="PV10.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="CanteiroCentral03.jpeg" alt="Canteiro Central">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+                <img src="PV11.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="CanteiroCentral02.jpeg" alt="Canteiro Central">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+                <img src="PV12.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="CanteiroCentral.jpeg" alt="Canteiro Central">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro Central</div>
+                <img src="PV13.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Canteiro.jpeg" alt="Canteiro">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Canteiro</div>
+                <img src="PV14.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL08.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="PV15.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL07.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="PV16.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL06.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="PV17.jpeg" alt="Registro Fotográfico">
+            </div>
+            
+            <div class="photo-card">
+                <img src="BL01.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL05.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="BL04.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL04.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="BL05.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="BL01.jpeg" alt="Boca de Lobo">
-                <div class="photo-caption"><strong>Manutenções:</strong> Boca de Lobo (BL)</div>
+                <img src="BL06.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Arbustos02.jpeg" alt="Arbustos">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Arbustos</div>
+                <img src="BL07.jpeg" alt="Registro Fotográfico">
             </div>
             <div class="photo-card">
-                <img src="Arbustos.jpeg" alt="Arbustos">
-                <div class="photo-caption"><strong>Paisagismo:</strong> Arbustos</div>
-            </div>
-            <div class="photo-card">
-                <img src="Alvenaria02.jpeg" alt="Alvenaria">
-                <div class="photo-caption"><strong>Infraestrutura:</strong> Alvenaria</div>
-            </div>
-            <div class="photo-card">
-                <img src="Alvenaria01.jpeg" alt="Alvenaria">
-                <div class="photo-caption"><strong>Infraestrutura:</strong> Alvenaria</div>
-            </div>
-            <div class="photo-card">
-                <img src="Acesso.jpeg" alt="Acesso">
-                <div class="photo-caption"><strong>Acesso:</strong> Entrada do Empreendimento</div>
-            </div>
-            <div class="photo-card">
-                <img src="Abrigo.jpeg" alt="Abrigo">
-                <div class="photo-caption"><strong>Esgoto Sanitário:</strong> Casa de abrigo</div>
+                <img src="BL08.jpeg" alt="Registro Fotográfico">
             </div>
 
         </div>
@@ -586,7 +537,7 @@
         <div class="signature">
             <hr>
             <strong>Gustavo Costa</strong><br>
-            Engenheiro Responsável / Gestor de Obras
+            Analista de Engenharia - Suprimentos
         </div>
     </div>
 </body>
