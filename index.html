@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Relatório Técnico - Loteamento Joaquim Leme</title>
+    <title>Relatório Técnico - Joaquim Leme</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
@@ -51,16 +52,45 @@
         }
         *, *::before, *::after { box-sizing: border-box; }
         
-        /* Cabeçalho Minimalista */
-        .header { border-bottom: 1px solid #ECF0F1; padding-bottom: 10px; margin-bottom: 15px; }
-        .header h1 { color: #173A5E; margin: 0 0 5px 0; font-size: 16pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .header p { margin: 2px 0; font-size: 9pt; color: #555; }
+        /* Cabeçalho Aprimorado */
+        .header { 
+            background-color: #F8F9FA;
+            border: 1px solid #D7DEE6;
+            border-top: 6px solid #173A5E;
+            border-radius: 5px;
+            padding: 20px; 
+            margin-bottom: 25px; 
+            text-align: center;
+        }
+        .header h1 { 
+            color: #173A5E; 
+            margin: 0 0 10px 0; 
+            font-size: 19pt; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .header p { 
+            margin: 4px 0; 
+            font-size: 10.5pt; 
+            color: #444; 
+        }
         
-        /* Títulos */
+        /* Quadros dos Títulos de Bloco */
         h2 { 
-            color: #173A5E; border-bottom: 1px solid #ECF0F1; padding-bottom: 4px; 
-            margin-top: 15px; margin-bottom: 10px; font-size: 12pt; font-weight: 600;
-            display: flex; align-items: center; page-break-after: avoid; 
+            background-color: #F8F9FA; 
+            color: #173A5E; 
+            border: 1px solid #D7DEE6; 
+            border-left: 5px solid #173A5E; 
+            padding: 10px 15px; 
+            border-radius: 4px;
+            margin-top: 25px; 
+            margin-bottom: 15px; 
+            font-size: 13pt; 
+            font-weight: 600;
+            display: flex; 
+            align-items: center; 
+            page-break-after: avoid; 
         }
         .icon { margin-right: 8px; display: inline-block; vertical-align: middle; }
         
@@ -94,8 +124,8 @@
         /* Tabela Pendências (Página 2 - Paisagem) */
         .pendencias-table { height: auto; min-height: 80vh; }
         .pendencias-table th, .pendencias-table td { padding: 6px 8px; font-size: 8.5pt; line-height: 1.3; }
-        .col-area { width: 14%; vertical-align: middle; text-align: center; }
-        .col-desc { width: 33%; text-align: justify; }
+        .col-area { width: 12%; vertical-align: middle; text-align: center; }
+        .col-desc { width: 35%; text-align: justify; }
         .col-action { width: 38%; text-align: justify; color: #444; }
         .col-resp { width: 15%; text-align: center; font-weight: 500; }
 
@@ -103,8 +133,8 @@
         .gantt-table { table-layout: fixed; height: auto; min-height: 85vh; }
         .gantt-table th, .gantt-table td { border: 1px solid #ECF0F1; padding: 3px 2px; font-size: 7.5pt; word-wrap: break-word; }
         .gantt-table th { text-align: center; }
-        .gantt-area { width: 14%; text-align: center; vertical-align: middle; }
-        .gantt-desc { width: 33%; text-align: left; color: #444; }
+        .gantt-area { width: 12%; text-align: center; vertical-align: middle; }
+        .gantt-desc { width: 35%; text-align: left; color: #444; }
         .gantt-day { background-color: #F8F9FA; padding: 2px 0px !important; text-align: center; }
         .gantt-cell { padding: 0 !important; height: 16px; border: 1px solid #f0f0f0; }
         
@@ -144,7 +174,7 @@
         /* Assinatura */
         .signature {
             text-align: center; 
-            margin-top: 100px; /* Aumentado para não ficar colado nas fotos */
+            margin-top: 100px; 
             page-break-inside: avoid;
             color: #555;
             font-size: 9pt;
@@ -316,7 +346,7 @@
         <table class="gantt-table">
             <thead>
                 <tr>
-                    <th class="gantt-area" style="text-align: center;">Área</th>
+                    <th class="gantt-area">Área</th>
                     <th class="gantt-desc" style="text-align: left;">Pendência</th>
                     <th class='gantt-day'>21<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>22<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>23<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>24<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>25<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>28<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>29<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>30<br><span style='font-size: 5pt; font-weight: normal;'>09</span></th><th class='gantt-day'>01<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>02<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>05<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>06<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>07<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>08<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>09<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>12<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>13<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>14<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>15<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>16<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>19<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>20<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>21<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>22<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>23<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>26<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>27<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>28<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>29<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th><th class='gantt-day'>30<br><span style='font-size: 5pt; font-weight: normal;'>10</span></th>
                 </tr>
@@ -538,7 +568,7 @@
         <div class="signature">
             <hr>
             <strong>Gustavo Costa</strong><br>
-            Analista de Engenharia 
+            Engenheiro Responsável / Gestor de Obras
         </div>
     </div>
 </body>
